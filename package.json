@@ -1,0 +1,37 @@
+{
+  "name": "maptalks.multiSuite",
+  "version": "0.1.0-beta.1",
+  "description": "An Suite to Combine <-> Decompose, Peel <-> Fill MultiPolygon.",
+  "license": "MIT",
+  "author": "cXiaof",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cXiaof/maptalks.multiSuite.git"
+  },
+  "main": "dist/maptalks.multiSuite.min.js",
+  "keywords": ["maptalks", "multiSuite", "combine", "decompose", "split", "peel"],
+  "bugs": {
+    "url": "https://github.com/cXiaof/maptalks.multiSuite/issues"
+  },
+  "homepage": "https://github.com/cXiaof/maptalks.multiSuite",
+  "scripts": {
+    "prepublish": "gulp minify",
+    "b": "gulp minify",
+    "watch": "gulp watch",
+    "w": "gulp watch",
+    "i": "jsinspect ./index.js",
+    "it": "jsinspect -t 20 ./index.js"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.6",
+    "babel-preset-env": "^1.7.0",
+    "gulp": "^3.9.1",
+    "jsinspect": "^0.12.7",
+    "maptalks": "^0.40.5",
+    "maptalks-build-helpers": "^0.5.0"
+  },
+  "dependencies": {
+    "kld-intersections": "^0.4.2",
+    "lodash": "^4.17.10"
+  }
+}
