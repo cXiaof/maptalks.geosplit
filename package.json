@@ -1,19 +1,19 @@
 {
-  "name": "maptalks.multiSuite",
-  "version": "0.1.0-beta.1",
-  "description": "An Suite to Combine <-> Decompose, Peel <-> Fill MultiPolygon.",
+  "name": "maptalks.geosplit",
+  "version": "0.1.0-alpha.1",
+  "description": "An tools to split Polygon or Line whith one or more lines.",
   "license": "MIT",
   "author": "cXiaof",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cXiaof/maptalks.multiSuite.git"
+    "url": "https://github.com/cXiaof/maptalks.geosplit.git"
   },
-  "main": "dist/maptalks.multiSuite.min.js",
-  "keywords": ["maptalks", "multiSuite", "combine", "decompose", "split", "peel"],
+  "main": "dist/maptalks.geosplit.min.js",
+  "keywords": ["maptalks", "geosplit", "split"],
   "bugs": {
-    "url": "https://github.com/cXiaof/maptalks.multiSuite/issues"
+    "url": "https://github.com/cXiaof/maptalks.geosplit/issues"
   },
-  "homepage": "https://github.com/cXiaof/maptalks.multiSuite",
+  "homepage": "https://github.com/cXiaof/maptalks.geosplit",
   "scripts": {
     "prepublish": "gulp minify",
     "b": "gulp minify",
