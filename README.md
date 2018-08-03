@@ -23,6 +23,9 @@ As a plugin, `maptalks.geosplit` must be loaded after `maptalks.js` in browsers.
     // new GeoSplit and layer
     const ms = new maptalks.GeoSplit()
     const layer = new maptalks.VectorLayer('v').addTo(map)
+
+    // use GeoSplit API, targets is not necessary parameters and if no targets user will choose geometry on the map
+    // get details in API Reference
 </script>
 ```
 
@@ -31,6 +34,14 @@ As a plugin, `maptalks.geosplit` must be loaded after `maptalks.js` in browsers.
 ```javascript
 new maptalks.GeoSplit()
 ```
+
+-   options
+    -   none
+
+`split(geometry, targets)`
+`submit(callback)` callback can get two attr, the result and deals which be remove in task
+`cancel()`
+`remove()`
 
 ## Contributing
 
@@ -84,4 +95,4 @@ $ npm run lint
 
 -   [maptalks.autoadsorb](https://github.com/cXiaof/maptalks.autoadsorb/issues)
 -   [maptalks.multisuite](https://github.com/cXiaof/maptalks.multisuite/issues)
--   [maptalks.geosplit](https://github.com/cXiaof/maptalks.geosplit/issues) (to be continued)
+-   [maptalks.geosplit](https://github.com/cXiaof/maptalks.geosplit/issues)

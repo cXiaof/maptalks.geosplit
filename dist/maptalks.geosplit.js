@@ -6696,67 +6696,9 @@ var GeoSplit = function (_maptalks$Class) {
         return _this;
     }
 
-    GeoSplit.prototype.combine = function combine(geometry, targets) {
-        if (geometry instanceof maptalks.Geometry) {
-            this._initialTaskWithGeo(geometry, 'combine');
-            if (targets instanceof maptalks.Geometry) targets = [targets];
-            if (targets instanceof Array && targets.length > 0) this._compositWithTargets(targets);else this._initialChooseGeos(geometry);
-            return this;
-        }
-    };
-
-    GeoSplit.prototype.decompose = function decompose(geometry, targets) {
-        if (geometry instanceof maptalks.GeometryCollection) {
-            this._initialTaskWithGeo(geometry, 'decompose');
-            if (targets instanceof maptalks.Geometry) targets = [targets];
-            if (targets instanceof Array && targets.length > 0) this._decomposeWithTargets(targets);else this._initialChooseGeos(geometry);
-            return this;
-        }
-    };
-
-    GeoSplit.prototype.peel = function peel(geometry, targets) {
-        if (geometry instanceof maptalks.Polygon) {
-            this._initialTaskWithGeo(geometry, 'peel');
-            if (targets instanceof maptalks.Polygon) targets = [targets];
-            if (targets instanceof Array && targets.length > 0) {
-                this._peelWithTargets(targets);
-                this.remove();
-            }
-            return this;
-        }
-    };
-
-    GeoSplit.prototype.fill = function fill(geometry, targets, fillAll) {
-        var _this2 = this;
-
-        if (geometry instanceof maptalks.MultiPolygon) {
-            this._initialTaskWithGeo(geometry, 'fill');
-            if (fillAll) {
-                this._fillAll();
-                this.remove();
-            } else {
-                if (targets instanceof maptalks.Polygon) targets = [targets];
-                if (targets instanceof Array && targets.length > 0) {
-                    this._fillWithTargets(targets);
-                    this.remove();
-                } else {
-                    var coords0 = this.geometry.getCoordinates()[0];
-                    var symbol = this.geometry.getSymbol();
-                    symbol.polygonOpacity = 0;
-                    coords0.forEach(function (coord, index) {
-                        if (index > 0) new maptalks.Polygon([coords0[index]], {
-                            symbol: symbol
-                        }).addTo(_this2._tmpLayer);
-                    });
-                }
-            }
-            return this;
-        }
-    };
-
     GeoSplit.prototype.split = function split(geometry, targets) {
         if (geometry instanceof maptalks.Polygon || geometry instanceof maptalks.LineString) {
-            this._initialTaskWithGeo(geometry, 'split');
+            this._initialTaskWithGeo(geometry);
             if (targets instanceof maptalks.LineString) targets = [targets];
             if (targets instanceof Array && targets.length > 0) {
                 this._splitWithTargets(targets);
@@ -6771,25 +6713,7 @@ var GeoSplit = function (_maptalks$Class) {
             return false;
         };
 
-        switch (this._task) {
-            case 'combine':
-                this._submitCombine();
-                break;
-            case 'decompose':
-                this._submitDecompose();
-                break;
-            case 'peel':
-                this._submitPeel();
-                break;
-            case 'fill':
-                this._submitFill();
-                break;
-            case 'split':
-                this._submitSplit();
-                break;
-            default:
-                break;
-        }
+        this._splitWithTargets();
         callback(this._result, this._deals);
         this.remove();
     };
@@ -6806,7 +6730,6 @@ var GeoSplit = function (_maptalks$Class) {
         this._offMapEvents();
         delete this._result;
         delete this._deals;
-        delete this._task;
         delete this._tmpLayer;
         delete this._chooseLayer;
         delete this._mousemove;
@@ -6814,29 +6737,9 @@ var GeoSplit = function (_maptalks$Class) {
         delete this._dblclick;
     };
 
-    GeoSplit.prototype._initialTaskWithGeo = function _initialTaskWithGeo(geometry, task) {
+    GeoSplit.prototype._initialTaskWithGeo = function _initialTaskWithGeo(geometry) {
         this._insureSafeTask();
-        this._task = task;
         this._savePrivateGeometry(geometry);
-    };
-
-    GeoSplit.prototype._initialChooseGeos = function _initialChooseGeos(geometry) {
-        var _this3 = this;
-
-        switch (this._task) {
-            case 'combine':
-                this._chooseGeos = [geometry];
-                break;
-            case 'decompose':
-                geometry._geometries.forEach(function (geo) {
-                    return geo.copy().addTo(_this3._tmpLayer);
-                });
-                this._chooseGeos = this._tmpLayer.getGeometries();
-                break;
-            default:
-                break;
-        }
-        this._updateChooseGeos();
     };
 
     GeoSplit.prototype._insureSafeTask = function _insureSafeTask() {
@@ -6861,15 +6764,15 @@ var GeoSplit = function (_maptalks$Class) {
     };
 
     GeoSplit.prototype._registerMapEvents = function _registerMapEvents() {
-        var _this4 = this;
+        var _this2 = this;
 
         if (!this._mousemove) {
             var _map = this._map;
             this._mousemove = function (e) {
-                return _this4._mousemoveEvents(e);
+                return _this2._mousemoveEvents(e);
             };
             this._click = function (e) {
-                return _this4._clickEvents(e);
+                return _this2._clickEvents(e);
             };
             _map.on('mousemove', this._mousemove, this);
             _map.on('click', this._click, this);
@@ -6885,39 +6788,15 @@ var GeoSplit = function (_maptalks$Class) {
     };
 
     GeoSplit.prototype._mousemoveEvents = function _mousemoveEvents(e) {
-        var _this5 = this;
+        var _this3 = this;
 
         var geos = [];
-        var notNeedSame = false;
-        switch (this._task) {
-            case 'combine':
-                geos = this.layer.identify(e.coordinate);
-                break;
-            case 'decompose':
-                geos = this._tmpLayer.identify(e.coordinate);
-                break;
-            case 'peel':
-                var coordPeel = this._getSafeCoords();
-                this.layer.identify(e.coordinate).forEach(function (geo) {
-                    var coord = _this5._getSafeCoords(geo);
-                    if (!isEqual_1(coord, coordPeel)) geos.push(geo);
-                });
-                break;
-            case 'fill':
-                geos = this._tmpLayer.identify(e.coordinate);
-                break;
-            case 'split':
-                var coordSplit = this._getSafeCoords();
-                this.layer.identify(e.coordinate).forEach(function (geo) {
-                    var coord = _this5._getSafeCoords(geo);
-                    if (!isEqual_1(coord, coordSplit) && geo instanceof maptalks.LineString) geos.push(geo);
-                });
-                notNeedSame = true;
-                break;
-            default:
-                break;
-        }
-        this._updateHitGeo(geos, notNeedSame);
+        var coordSplit = this._getSafeCoords();
+        this.layer.identify(e.coordinate).forEach(function (geo) {
+            var coord = _this3._getSafeCoords(geo);
+            if (!isEqual_1(coord, coordSplit) && geo instanceof maptalks.LineString) geos.push(geo);
+        });
+        this._updateHitGeo(geos);
     };
 
     GeoSplit.prototype._getSafeCoords = function _getSafeCoords() {
@@ -6937,7 +6816,7 @@ var GeoSplit = function (_maptalks$Class) {
         return coords;
     };
 
-    GeoSplit.prototype._updateHitGeo = function _updateHitGeo(geos, notNeedSame) {
+    GeoSplit.prototype._updateHitGeo = function _updateHitGeo(geos) {
         var id = '_hit';
         if (this._needRefreshSymbol) {
             var hitGeoCopy = this._chooseLayer.getGeometryById(id);
@@ -6950,17 +6829,9 @@ var GeoSplit = function (_maptalks$Class) {
         if (geos && geos.length > 0) {
             this._needRefreshSymbol = true;
             this.hitGeo = geos[0];
-            if (this._checkIsSameType(this.hitGeo) || notNeedSame) {
-                var hitSymbol = this._getSymbolOrDefault(this.hitGeo, 'Hit');
-                this._copyGeoUpdateSymbol(this.hitGeo, hitSymbol).setId(id);
-            } else delete this.hitGeo;
+            var hitSymbol = this._getSymbolOrDefault(this.hitGeo, 'Hit');
+            this._copyGeoUpdateSymbol(this.hitGeo, hitSymbol).setId(id);
         }
-    };
-
-    GeoSplit.prototype._checkIsSameType = function _checkIsSameType(geo) {
-        var typeHit = geo.type;
-        var typeThis = this.geometry.type;
-        return typeHit.includes(typeThis) || typeThis.includes(typeHit);
     };
 
     GeoSplit.prototype._getSymbolOrDefault = function _getSymbolOrDefault(geo, type) {
@@ -6972,20 +6843,7 @@ var GeoSplit = function (_maptalks$Class) {
                 if (key.endsWith('Fill') || key.endsWith('Color')) symbol[key] = color;
             }
             symbol.lineWidth = lineWidth;
-        } else {
-            if (geo.type.endsWith('Point')) symbol = {
-                markerFill: color,
-                markerType: 'path',
-                markerPath: [{
-                    path: 'M8 23l0 0 0 0 0 0 0 0 0 0c-4,-5 -8,-10 -8,-14 0,-5 4,-9 8,-9l0 0 0 0c4,0 8,4 8,9 0,4 -4,9 -8,14z M3,9 a5,5 0,1,0,0,-0.9Z',
-                    fill: '#DE3333'
-                }],
-                markerPathWidth: 16,
-                markerPathHeight: 23,
-                markerWidth: 24,
-                markerHeight: 34
-            };else symbol = { lineColor: color, lineWidth: lineWidth };
-        }
+        } else symbol = { lineColor: color, lineWidth: lineWidth };
         return symbol;
     };
 
@@ -6994,227 +6852,33 @@ var GeoSplit = function (_maptalks$Class) {
     };
 
     GeoSplit.prototype._clickEvents = function _clickEvents(e) {
-        switch (this._task) {
-            case 'combine':
-                this._clickCombine();
-                break;
-            case 'decompose':
-                this._clickDecompose(e);
-                break;
-            default:
-                if (this.hitGeo) {
-                    var coordHit = this._getSafeCoords(this.hitGeo);
-                    this._setChooseGeosExceptHit(coordHit);
-                    this._updateChooseGeos();
-                }
-                break;
-        }
-    };
-
-    GeoSplit.prototype._clickCombine = function _clickCombine() {
         if (this.hitGeo) {
             var coordHit = this._getSafeCoords(this.hitGeo);
-            var coordThis = this._getSafeCoords();
-            if (isEqual_1(coordHit, coordThis)) return null;
             this._setChooseGeosExceptHit(coordHit);
             this._updateChooseGeos();
         }
     };
 
     GeoSplit.prototype._setChooseGeosExceptHit = function _setChooseGeosExceptHit(coordHit, hasTmp) {
-        var _this6 = this;
+        var _this4 = this;
 
         var chooseNext = [];
         this._chooseGeos.forEach(function (geo) {
-            var coord = _this6._getSafeCoords(geo);
+            var coord = _this4._getSafeCoords(geo);
             if (!isEqual_1(coordHit, coord)) chooseNext.push(geo);
         });
         if (!hasTmp && chooseNext.length === this._chooseGeos.length) this._chooseGeos.push(this.hitGeo);else this._chooseGeos = chooseNext;
     };
 
     GeoSplit.prototype._updateChooseGeos = function _updateChooseGeos() {
-        var _this7 = this;
+        var _this5 = this;
 
         var layer = this._chooseLayer;
         layer.clear();
         this._chooseGeos.forEach(function (geo) {
-            var chooseSymbol = _this7._getSymbolOrDefault(geo, 'Choose');
-            _this7._copyGeoUpdateSymbol(geo, chooseSymbol);
+            var chooseSymbol = _this5._getSymbolOrDefault(geo, 'Choose');
+            _this5._copyGeoUpdateSymbol(geo, chooseSymbol);
         });
-    };
-
-    GeoSplit.prototype._clickDecompose = function _clickDecompose(e) {
-        var geos = [];
-        this._chooseLayer.identify(e.coordinate).forEach(function (geo) {
-            if (geo.getId() !== '_hit') geos.push(geo);
-        });
-        if (geos.length > 0) {
-            var geo = geos[0];
-            var coordHit = this._getSafeCoords(geo);
-            this._setChooseGeosExceptHit(coordHit, true);
-            geo.remove();
-        } else if (this.hitGeo) this._chooseGeos.push(this.hitGeo);
-        this._updateChooseGeos();
-    };
-
-    GeoSplit.prototype._submitCombine = function _submitCombine() {
-        this._compositWithTargets();
-    };
-
-    GeoSplit.prototype._compositWithTargets = function _compositWithTargets() {
-        var _this8 = this;
-
-        var targets = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._chooseGeos;
-
-        this._deals = [];
-        targets.forEach(function (geo) {
-            return _this8._deals.push(geo.copy());
-        });
-
-        var geosCoords = this._getGeoStringifyCoords(targets);
-
-        var geos = [];
-        this.layer.getGeometries().forEach(function (geo) {
-            var coord = _this8._getGeoStringifyCoords(geo);
-            if (geosCoords.includes(coord)) {
-                if (geo.type.startsWith('Multi')) geo._geometries.forEach(function (item) {
-                    return geos.push(item.copy());
-                });else geos.push(geo.copy());
-                geo.remove();
-            }
-        });
-        this._compositResultGeo(geos);
-    };
-
-    GeoSplit.prototype._getGeoStringifyCoords = function _getGeoStringifyCoords(geo) {
-        var _this9 = this;
-
-        if (geo instanceof Array) {
-            var arr = [];
-            geo.forEach(function (item) {
-                return arr.push(JSON.stringify(_this9._getSafeCoords(item)));
-            });
-            return arr;
-        }
-        return JSON.stringify(this._getSafeCoords(geo));
-    };
-
-    GeoSplit.prototype._compositResultGeo = function _compositResultGeo(geos) {
-        var length = geos.length;
-
-        if (!length || length === 0) return null;
-        var combine = void 0;
-        switch (geos[0].type) {
-            case 'Point':
-                combine = new maptalks.MultiPoint(geos);
-                break;
-            case 'LineString':
-                combine = new maptalks.MultiLineString(geos);
-                break;
-            default:
-                combine = new maptalks.MultiPolygon(geos);
-                break;
-        }
-        combine.setSymbol(this.geometry.getSymbol());
-        combine.setProperties(this.geometry.getProperties());
-        combine.addTo(this.layer);
-        this._result = combine;
-    };
-
-    GeoSplit.prototype._submitDecompose = function _submitDecompose() {
-        this._decomposeWithTargets();
-    };
-
-    GeoSplit.prototype._decomposeWithTargets = function _decomposeWithTargets() {
-        var _this10 = this;
-
-        var targets = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._chooseLayer.getGeometries();
-
-        var geosCoords = [];
-        targets.forEach(function (geo) {
-            if (geo.getId() !== '_hit') geosCoords.push(_this10._getGeoStringifyCoords(geo));
-        });
-
-        var geos = [];
-        this._deals = [];
-        this._tmpLayer.getGeometries().forEach(function (geo) {
-            var coord = _this10._getGeoStringifyCoords(geo);
-            if (geosCoords.includes(coord)) geos.push(geo.copy());else {
-                geo = geo.copy().addTo(_this10.layer);
-                _this10._deals.push(geo);
-            }
-        });
-        this.geometry.remove();
-        this._compositResultGeo(geos);
-    };
-
-    GeoSplit.prototype._peelWithTargets = function _peelWithTargets() {
-        var _this11 = this;
-
-        var targets = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._chooseGeos;
-
-        var geometry = this.geometry;
-        var arr = [this._getSafeCoords(geometry)[0]];
-        this._deals = [];
-        targets.forEach(function (geo) {
-            if (geo instanceof maptalks.MultiPolygon) geo._geometries.forEach(function (item) {
-                return arr.push(_this11._getSafeCoords(item)[0]);
-            });else arr.push(_this11._getSafeCoords(geo)[0]);
-            _this11._deals.push(geo.copy());
-            geo.remove();
-        });
-        this._result = new maptalks.MultiPolygon([arr], {
-            symbol: geometry.getSymbol(),
-            properties: geometry.getProperties()
-        }).addTo(geometry._layer);
-        geometry.remove();
-    };
-
-    GeoSplit.prototype._submitPeel = function _submitPeel() {
-        this._peelWithTargets();
-    };
-
-    GeoSplit.prototype._submitFill = function _submitFill() {
-        this._fillWithTargets();
-    };
-
-    GeoSplit.prototype._submitSplit = function _submitSplit() {
-        this._splitWithTargets();
-    };
-
-    GeoSplit.prototype._fillAll = function _fillAll() {
-        var coords = this.geometry.getCoordinates();
-        var symbol = this.geometry.getSymbol();
-        var properties = this.geometry.getProperties();
-        new maptalks.Polygon([coords[0][0]], { symbol: symbol, properties: properties }).addTo(this.layer);
-        this.geometry.remove();
-    };
-
-    GeoSplit.prototype._fillWithTargets = function _fillWithTargets() {
-        var _this12 = this;
-
-        var targets = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._chooseGeos;
-
-        var symbol = this.geometry.getSymbol();
-        var properties = this.geometry.getProperties();
-
-        var coordsStr = [];
-        this._deals = [];
-        targets.forEach(function (target) {
-            var coordsTarget = JSON.stringify(target.getCoordinates()[0]);
-            coordsStr.push(coordsTarget);
-            _this12._deals.push(target.setSymbol(symbol).copy());
-        });
-
-        var coords = [];
-        this.geometry.getCoordinates()[0].forEach(function (coord) {
-            if (!coordsStr.includes(JSON.stringify(coord))) coords.push(coord);
-        });
-        this._result = new maptalks.MultiPolygon([coords], {
-            symbol: symbol,
-            properties: properties
-        }).addTo(this.layer);
-        this.geometry.remove();
     };
 
     GeoSplit.prototype._splitWithTargets = function _splitWithTargets() {
@@ -7226,7 +6890,7 @@ var GeoSplit = function (_maptalks$Class) {
     };
 
     GeoSplit.prototype._splitPolygonWithTargets = function _splitPolygonWithTargets(targets) {
-        var _this13 = this;
+        var _this6 = this;
 
         var result = void 0;
         targets = this._getPolygonAvailTargets(targets);
@@ -7234,22 +6898,22 @@ var GeoSplit = function (_maptalks$Class) {
             if (result) {
                 var results = [];
                 result.forEach(function (geo) {
-                    _this13.geometry = geo;
-                    results.push.apply(results, _this13._splitPolygonTargetBase(target));
+                    _this6.geometry = geo;
+                    results.push.apply(results, _this6._splitPolygonTargetBase(target));
                 });
                 result = results;
-            } else result = _this13._splitPolygonTargetBase(target);
+            } else result = _this6._splitPolygonTargetBase(target);
             target.remove();
         });
         this._result = result;
     };
 
     GeoSplit.prototype._getPolygonAvailTargets = function _getPolygonAvailTargets(targets) {
-        var _this14 = this;
+        var _this7 = this;
 
         var avails = [];
         targets.forEach(function (target) {
-            avails.push.apply(avails, _this14._getPolygonAvailTarget(target));
+            avails.push.apply(avails, _this7._getPolygonAvailTarget(target));
             target.remove();
         });
         return avails;
@@ -7315,7 +6979,7 @@ var GeoSplit = function (_maptalks$Class) {
     };
 
     GeoSplit.prototype._splitWithTargetCommon = function _splitWithTargetCommon(target) {
-        var _this15 = this;
+        var _this8 = this;
 
         var coords0 = this._getSafeCoords()[0];
         var polyline = this._getPoint2dFromCoords(target);
@@ -7354,10 +7018,7 @@ var GeoSplit = function (_maptalks$Class) {
         var geo = new maptalks.Polygon(main, { symbol: symbol, properties: properties }).addTo(this.layer);
         result.push(geo);
         children.forEach(function (childCoord) {
-            geo = new maptalks.Polygon(childCoord, {
-                symbol: symbol,
-                properties: properties
-            }).addTo(_this15.layer);
+            geo = new maptalks.Polygon(childCoord, { symbol: symbol, properties: properties }).addTo(_this8.layer);
             result.push(geo);
         });
         return result;
@@ -7456,7 +7117,7 @@ var GeoSplit = function (_maptalks$Class) {
     };
 
     GeoSplit.prototype._splitLineWithTargets = function _splitLineWithTargets(targets) {
-        var _this16 = this;
+        var _this9 = this;
 
         targets = this._getLineAvailTargets(targets);
         var result = void 0;
@@ -7464,18 +7125,18 @@ var GeoSplit = function (_maptalks$Class) {
             if (result) {
                 var results = [];
                 result.forEach(function (geo) {
-                    _this16.geometry = geo;
-                    results.push.apply(results, _this16._splitLineTargetBase(target));
+                    _this9.geometry = geo;
+                    results.push.apply(results, _this9._splitLineTargetBase(target));
                 });
                 result = results;
-            } else result = _this16._splitLineTargetBase(target);
+            } else result = _this9._splitLineTargetBase(target);
             target.remove();
         });
         this._result = result;
     };
 
     GeoSplit.prototype._splitLineTargetBase = function _splitLineTargetBase(target) {
-        var _this17 = this;
+        var _this10 = this;
 
         var polyline = this._getPoint2dFromCoords(target);
         var coords = this._getSafeCoords();
@@ -7504,18 +7165,18 @@ var GeoSplit = function (_maptalks$Class) {
         }
         var result = [];
         lines.forEach(function (line) {
-            return result.push(new maptalks.LineString(line).addTo(_this17.layer));
+            return result.push(new maptalks.LineString(line).addTo(_this10.layer));
         });
         this.geometry.remove();
         return result;
     };
 
     GeoSplit.prototype._getLineAvailTargets = function _getLineAvailTargets(targets) {
-        var _this18 = this;
+        var _this11 = this;
 
         var avails = [];
         targets.forEach(function (target) {
-            avails.push.apply(avails, _this18._getLineAvailTarget(target));
+            avails.push.apply(avails, _this11._getLineAvailTarget(target));
             target.remove();
         });
         return avails;
@@ -7535,7 +7196,7 @@ var GeoSplit = function (_maptalks$Class) {
     return GeoSplit;
 }(maptalks.Class);
 
-MultiSuite.mergeOptions(options);
+GeoSplit.mergeOptions(options);
 
 exports.GeoSplit = GeoSplit;
 
