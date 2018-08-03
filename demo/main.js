@@ -10,7 +10,7 @@ const map = new maptalks.Map('map', {
     })
 })
 
-const ms = new maptalks.MultiSuite()
+const gs = new maptalks.GeoSplit()
 const layer = new maptalks.VectorLayer('sketchPad').addTo(map)
 layer.on('addGeo', () =>
     layer
@@ -61,7 +61,7 @@ const toolbar = new maptalks.control.Toolbar({
             item: 'Clear',
             click: () => {
                 layer.clear()
-                ms.cancel()
+                gs.cancel()
             }
         }
     ]
@@ -71,38 +71,18 @@ const getOptions = (geometry) => {
     return {
         items: [
             {
-                item: 'combine',
-                click: () => ms.combine(geometry)
-            },
-            '-',
-            {
-                item: 'decompose',
-                click: () => ms.decompose(geometry)
-            },
-            '-',
-            {
                 item: 'split',
-                click: () => ms.split(geometry)
-            },
-            '-',
-            {
-                item: 'peel',
-                click: () => ms.peel(geometry)
-            },
-            '-',
-            {
-                item: 'fill',
-                click: () => ms.fill(geometry)
+                click: () => gs.split(geometry)
             },
             '-',
             {
                 item: 'submit',
-                click: () => ms.submit((result, deals) => console.log(result, deals))
+                click: () => gs.submit((result, deals) => console.log(result, deals))
             },
             '-',
             {
                 item: 'cancel',
-                click: () => ms.cancel()
+                click: () => gs.cancel()
             }
         ]
     }

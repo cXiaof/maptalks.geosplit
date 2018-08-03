@@ -5,7 +5,7 @@ import flattenDeep from 'lodash/flattenDeep'
 
 const options = {}
 
-export class MultiSuite extends maptalks.Class {
+export class GeoSplit extends maptalks.Class {
     constructor(options) {
         super(options)
         this._layerName = `${maptalks.INTERNAL_LAYER_PREFIX}_CDSP`

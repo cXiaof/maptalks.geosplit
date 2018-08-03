@@ -1,7 +1,7 @@
 {
   "name": "maptalks.geosplit",
   "version": "0.1.0-alpha.1",
-  "description": "An tools to split Polygon or Line whith one or more lines.",
+  "description": "A tool to split Polygon or Line whith one or more lines.",
   "license": "MIT",
   "author": "cXiaof",
   "repository": {
