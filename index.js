@@ -21,7 +21,9 @@ export class GeoSplit extends maptalks.Class {
             if (targets instanceof maptalks.LineString) targets = [targets]
             if (targets instanceof Array && targets.length > 0) {
                 this._splitWithTargets(targets)
+                const result = this._result
                 this.remove()
+                return result
             }
             return this
         }
