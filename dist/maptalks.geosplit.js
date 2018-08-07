@@ -1,5 +1,5 @@
 /*!
- * maptalks.geosplit v0.1.0-alpha.1
+ * maptalks.geosplit v0.1.0-beta.1
  * LICENSE : MIT
  * (c) 2016-2018 maptalks.org
  */
@@ -6702,7 +6702,9 @@ var GeoSplit = function (_maptalks$Class) {
             if (targets instanceof maptalks.LineString) targets = [targets];
             if (targets instanceof Array && targets.length > 0) {
                 this._splitWithTargets(targets);
+                var result = this._result;
                 this.remove();
+                return result;
             }
             return this;
         }
@@ -7202,6 +7204,6 @@ exports.GeoSplit = GeoSplit;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.0-alpha.1');
+typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.0-beta.1');
 
 })));
