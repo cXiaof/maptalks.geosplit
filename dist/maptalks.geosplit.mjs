@@ -1,5 +1,5 @@
 /*!
- * maptalks.geosplit v0.1.0-beta.1
+ * maptalks.geosplit v0.1.0-beta.2
  * LICENSE : MIT
  * (c) 2016-2018 maptalks.org
  */
@@ -6672,7 +6672,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : _defaults(subClass, superClass); }
 
-var options = {};
+var options = {
+    deleteTargets: true
+};
 
 var GeoSplit = function (_maptalks$Class) {
     _inherits(GeoSplit, _maptalks$Class);
@@ -6880,9 +6882,11 @@ var GeoSplit = function (_maptalks$Class) {
     GeoSplit.prototype._splitWithTargets = function _splitWithTargets() {
         var targets = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._chooseGeos;
 
-        this._deals = this.geometry.copy();
-        if (this.geometry instanceof maptalks.Polygon) this._splitPolygonWithTargets(targets);
-        if (this.geometry instanceof maptalks.LineString) this._splitLineWithTargets(targets);
+        if (this.geometry) {
+            this._deals = this.options['deleteTargets'] ? targets : [];
+            if (this.geometry instanceof maptalks.Polygon) this._splitPolygonWithTargets(targets);
+            if (this.geometry instanceof maptalks.LineString) this._splitLineWithTargets(targets);
+        }
     };
 
     GeoSplit.prototype._splitPolygonWithTargets = function _splitPolygonWithTargets(targets) {
@@ -6899,7 +6903,7 @@ var GeoSplit = function (_maptalks$Class) {
                 });
                 result = results;
             } else result = _this6._splitPolygonTargetBase(target);
-            target.remove();
+            if (_this6.options['deleteTargets']) target.remove();
         });
         this._result = result;
     };
@@ -6910,7 +6914,7 @@ var GeoSplit = function (_maptalks$Class) {
         var avails = [];
         targets.forEach(function (target) {
             avails.push.apply(avails, _this7._getPolygonAvailTarget(target));
-            target.remove();
+            if (_this7.options['deleteTargets']) target.remove();
         });
         return avails;
     };
@@ -6967,9 +6971,7 @@ var GeoSplit = function (_maptalks$Class) {
     GeoSplit.prototype._splitPolygonTargetBase = function _splitPolygonTargetBase(target) {
         var points = this._getPolygonPolylineIntersectPoints(target);
         var result = void 0;
-        if (this._getSafeCoords(target).length === 2 || points.length === 2) {
-            if (this._getSafeCoords(target).length === 2) result = this._splitWithTargetCommon(target);else if (points.length === 2) result = this._splitWithTargetMoreTwo(target);
-        } else return [this.geometry];
+        if (points.length === 2) result = this._splitWithTargetMoreTwo(target);else if (this._getSafeCoords(target).length === 2 && points.length > 2) result = this._splitWithTargetCommon(target);else return [this.geometry];
         this.geometry.remove();
         return result;
     };
@@ -7126,7 +7128,7 @@ var GeoSplit = function (_maptalks$Class) {
                 });
                 result = results;
             } else result = _this9._splitLineTargetBase(target);
-            target.remove();
+            if (_this9.options['deleteTargets']) target.remove();
         });
         this._result = result;
     };
@@ -7173,7 +7175,7 @@ var GeoSplit = function (_maptalks$Class) {
         var avails = [];
         targets.forEach(function (target) {
             avails.push.apply(avails, _this11._getLineAvailTarget(target));
-            target.remove();
+            if (_this11.options['deleteTargets']) target.remove();
         });
         return avails;
     };
@@ -7196,4 +7198,4 @@ GeoSplit.mergeOptions(options);
 
 export { GeoSplit };
 
-typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.0-beta.1');
+typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.0-beta.2');

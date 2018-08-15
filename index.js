@@ -3,7 +3,9 @@ import isEqual from 'lodash/isEqual'
 import unionWith from 'lodash/unionWith'
 import flattenDeep from 'lodash/flattenDeep'
 
-const options = {}
+const options = {
+    deleteTargets: true
+}
 
 export class GeoSplit extends maptalks.Class {
     constructor(options) {
@@ -189,9 +191,11 @@ export class GeoSplit extends maptalks.Class {
     }
 
     _splitWithTargets(targets = this._chooseGeos) {
-        this._deals = this.geometry.copy()
-        if (this.geometry instanceof maptalks.Polygon) this._splitPolygonWithTargets(targets)
-        if (this.geometry instanceof maptalks.LineString) this._splitLineWithTargets(targets)
+        if (this.geometry) {
+            this._deals = this.options['deleteTargets'] ? targets : []
+            if (this.geometry instanceof maptalks.Polygon) this._splitPolygonWithTargets(targets)
+            if (this.geometry instanceof maptalks.LineString) this._splitLineWithTargets(targets)
+        }
     }
 
     _splitPolygonWithTargets(targets) {
@@ -206,7 +210,7 @@ export class GeoSplit extends maptalks.Class {
                 })
                 result = results
             } else result = this._splitPolygonTargetBase(target)
-            target.remove()
+            if (this.options['deleteTargets']) target.remove()
         })
         this._result = result
     }
@@ -215,7 +219,7 @@ export class GeoSplit extends maptalks.Class {
         let avails = []
         targets.forEach((target) => {
             avails.push(...this._getPolygonAvailTarget(target))
-            target.remove()
+            if (this.options['deleteTargets']) target.remove()
         })
         return avails
     }
@@ -267,11 +271,10 @@ export class GeoSplit extends maptalks.Class {
     _splitPolygonTargetBase(target) {
         const points = this._getPolygonPolylineIntersectPoints(target)
         let result
-        if (this._getSafeCoords(target).length === 2 || points.length === 2) {
-            if (this._getSafeCoords(target).length === 2)
-                result = this._splitWithTargetCommon(target)
-            else if (points.length === 2) result = this._splitWithTargetMoreTwo(target)
-        } else return [this.geometry]
+        if (points.length === 2) result = this._splitWithTargetMoreTwo(target)
+        else if (this._getSafeCoords(target).length === 2 && points.length > 2)
+            result = this._splitWithTargetCommon(target)
+        else return [this.geometry]
         this.geometry.remove()
         return result
     }
@@ -413,7 +416,7 @@ export class GeoSplit extends maptalks.Class {
                 })
                 result = results
             } else result = this._splitLineTargetBase(target)
-            target.remove()
+            if (this.options['deleteTargets']) target.remove()
         })
         this._result = result
     }
@@ -449,7 +452,7 @@ export class GeoSplit extends maptalks.Class {
         let avails = []
         targets.forEach((target) => {
             avails.push(...this._getLineAvailTarget(target))
-            target.remove()
+            if (this.options['deleteTargets']) target.remove()
         })
         return avails
     }

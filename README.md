@@ -33,10 +33,11 @@ As a plugin, `maptalks.geosplit` must be loaded after `maptalks.js` in browsers.
 
 ```javascript
 new maptalks.GeoSplit()
+// new maptalks.GeoSplit({ deleteTargets: false })
 ```
 
 -   options
-    -   none
+    -   deleteTargets **boolean** decide if targets lines will be removed, default is true
 
 `split(geometry, targets)`
 `submit(callback)` callback can get two attr, the result and deals which be remove in task
