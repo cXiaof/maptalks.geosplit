@@ -1,4 +1,4 @@
-import { Point2D, Intersection } from 'kld-intersections'
+import { Intersection } from 'kld-intersections'
 import isEqual from 'lodash/isEqual'
 import unionWith from 'lodash/unionWith'
 import flattenDeep from 'lodash/flattenDeep'
