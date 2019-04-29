@@ -110,25 +110,22 @@ export class GeoSplit extends maptalks.Class {
     }
 
     _mousemoveEvents(e) {
-        const coordSplit = this._getSafeCoords()
         const geos = this.layer.identify(e.coordinate)
         const lines = geos.reduce((target, geo) => {
+            if (!(geo instanceof maptalks.LineString)) return target
+            const coordSplit = this._getSafeCoords()
             const coord = this._getSafeCoords(geo)
-            if (
-                !isEqual(coord, coordSplit) &&
-                geo instanceof maptalks.LineString
-            )
-                return [...target, geo]
-            return target
+            if (isEqual(coord, coordSplit)) return target
+            return [...target, geo]
         }, [])
         this._updateHitGeo(lines)
     }
 
     _getSafeCoords(geo = this.geometry) {
         let coords = geo.getCoordinates()
-        if (geo.options.numberOfShellPoints) {
-            const { options } = geo
-            const { numberOfShellPoints } = options
+        const options = geo.options || {}
+        const { numberOfShellPoints } = options
+        if (numberOfShellPoints) {
             options.numberOfShellPoints = 300
             geo.setOptions(options)
             coords = [geo.getShell()]

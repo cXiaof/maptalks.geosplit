@@ -7419,12 +7419,13 @@ var GeoSplit = function (_maptalks$Class) {
     GeoSplit.prototype._mousemoveEvents = function _mousemoveEvents(e) {
         var _this3 = this;
 
-        var coordSplit = this._getSafeCoords();
         var geos = this.layer.identify(e.coordinate);
         var lines = geos.reduce(function (target, geo) {
+            if (!(geo instanceof maptalks.LineString)) return target;
+            var coordSplit = _this3._getSafeCoords();
             var coord = _this3._getSafeCoords(geo);
-            if (!lodash_isequal(coord, coordSplit) && geo instanceof maptalks.LineString) return [].concat(target, [geo]);
-            return target;
+            if (lodash_isequal(coord, coordSplit)) return target;
+            return [].concat(target, [geo]);
         }, []);
         this._updateHitGeo(lines);
     };
@@ -7433,15 +7434,15 @@ var GeoSplit = function (_maptalks$Class) {
         var geo = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.geometry;
 
         var coords = geo.getCoordinates();
-        if (geo.options.numberOfShellPoints) {
-            var _options = geo.options;
-            var numberOfShellPoints = _options.numberOfShellPoints;
+        var options = geo.options || {};
+        var numberOfShellPoints = options.numberOfShellPoints;
 
-            _options.numberOfShellPoints = 300;
-            geo.setOptions(_options);
+        if (numberOfShellPoints) {
+            options.numberOfShellPoints = 300;
+            geo.setOptions(options);
             coords = [geo.getShell()];
-            _options.numberOfShellPoints = numberOfShellPoints || 60;
-            geo.setOptions(_options);
+            options.numberOfShellPoints = numberOfShellPoints || 60;
+            geo.setOptions(options);
         }
         return coords;
     };
