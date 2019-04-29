@@ -9,24 +9,22 @@ A tool to split Polygon or Line whith one or more lines.
 ## Install
 
 -   Install with npm: `npm install maptalks.geosplit`.
+-   Install with yarn: `yarn add maptalks.geosplit`.
 -   Download from [dist directory](https://github.com/cXiaof/maptalks.geosplit/tree/master/dist).
--   Use unpkg CDN: `https://unpkg.com/maptalks.geosplit/dist/maptalks.geosplit.min.js`
+-   Use unpkg CDN: `https://cdn.jsdelivr.net/npm/maptalks.geosplit/dist/maptalks.geosplit.min.js`
 
 ## Usage
 
 As a plugin, `maptalks.geosplit` must be loaded after `maptalks.js` in browsers. You can also use `'import { GeoSplit } from "maptalks.geosplit"` when developing with webpack.
 
 ```html
-<script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/maptalks.geosplit/dist/maptalks.geosplit.min.js"></script>
-<script>
-    // new GeoSplit and layer
-    const ms = new maptalks.GeoSplit()
-    const layer = new maptalks.VectorLayer('v').addTo(map)
+<!-- ... -->
+<script src="https://cdn.jsdelivr.net/npm/maptalks.geosplit/dist/maptalks.geosplit.min.js"></script>
+<!-- ... -->
+```
 
-    // use GeoSplit API, targets is not necessary parameters and if no targets user will choose geometry on the map
-    // get details in API Reference
-</script>
+```javascript
+const ms = new maptalks.GeoSplit() // use GeoSplit API, targets is not necessary parameters and if no targets user will choose geometry on the map. Get details in API Reference.
 ```
 
 ## API Reference
@@ -39,7 +37,7 @@ new maptalks.GeoSplit()
 -   options
     -   deleteTargets **boolean** decide if targets lines will be removed, default is true
 
-`split(geometry, targets)`
+`split(geometry, targets)` **targets can be one line or lines-array**
 `submit(callback)` callback can get two attr, the result and deals which be remove in task
 `cancel()`
 `remove()`
@@ -66,18 +64,6 @@ $ npm install
 
 ```shell
 $ gulp watch
-```
-
--   Tests
-
-```shell
-$ npm test
-```
-
--   Watch source changes and run tests repeatedly
-
-```shell
-$ gulp tdd
 ```
 
 -   Package and generate minified bundles to dist directory

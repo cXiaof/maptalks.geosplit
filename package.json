@@ -1,6 +1,6 @@
 {
   "name": "maptalks.geosplit",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0",
   "description": "A tool to split Polygon or Line whith one or more lines.",
   "license": "MIT",
   "author": "cXiaof",
@@ -9,7 +9,11 @@
     "url": "https://github.com/cXiaof/maptalks.geosplit.git"
   },
   "main": "dist/maptalks.geosplit.min.js",
-  "keywords": ["maptalks", "geosplit", "split"],
+  "keywords": [
+    "maptalks",
+    "geosplit",
+    "split"
+  ],
   "bugs": {
     "url": "https://github.com/cXiaof/maptalks.geosplit/issues"
   },
@@ -18,20 +22,19 @@
     "prepublish": "gulp minify",
     "b": "gulp minify",
     "watch": "gulp watch",
-    "w": "gulp watch",
-    "i": "jsinspect ./index.js",
-    "it": "jsinspect -t 20 ./index.js"
-  },
-  "devDependencies": {
-    "babel-eslint": "^8.2.6",
-    "babel-preset-env": "^1.7.0",
-    "gulp": "^3.9.1",
-    "jsinspect": "^0.12.7",
-    "maptalks": "^0.40.5",
-    "maptalks-build-helpers": "^0.5.0"
+    "w": "gulp watch"
   },
   "dependencies": {
-    "kld-intersections": "^0.4.2",
-    "lodash": "^4.17.10"
+    "kld-intersections": "^0.4.3",
+    "lodash.flattendeep": "^4.4.0",
+    "lodash.isequal": "^4.5.0",
+    "lodash.unionwith": "^4.6.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "babel-preset-env": "^1.7.0",
+    "gulp": "^4.0.1",
+    "maptalks": "^0.44.0",
+    "maptalks-build-helpers": "^0.4.5"
   }
 }

@@ -1,7 +1,7 @@
 import { Intersection } from 'kld-intersections'
-import isEqual from 'lodash/isEqual'
-import unionWith from 'lodash/unionWith'
-import flattenDeep from 'lodash/flattenDeep'
+import isEqual from 'lodash.isequal'
+import unionWith from 'lodash.unionwith'
+import flattenDeep from 'lodash.flattendeep'
 
 const options = {
     deleteTargets: true
@@ -18,7 +18,10 @@ export class GeoSplit extends maptalks.Class {
     }
 
     split(geometry, targets) {
-        if (geometry instanceof maptalks.Polygon || geometry instanceof maptalks.LineString) {
+        if (
+            geometry instanceof maptalks.Polygon ||
+            geometry instanceof maptalks.LineString
+        ) {
             this._initialTaskWithGeo(geometry)
             if (targets instanceof maptalks.LineString) targets = [targets]
             if (targets instanceof Array && targets.length > 0) {
@@ -68,16 +71,22 @@ export class GeoSplit extends maptalks.Class {
     _savePrivateGeometry(geometry) {
         this.geometry = geometry
         this.layer = geometry._layer
-        if (geometry.type.startsWith('Multi')) this.layer = geometry._geometries[0]._layer
+        if (geometry.getType().startsWith('Multi'))
+            this.layer = geometry._geometries[0]._layer
         this._addTo(this.layer.map)
     }
 
     _addTo(map) {
         if (this._chooseLayer) this.remove()
-        if (map._map_tool && map._map_tool instanceof maptalks.DrawTool) map._map_tool.disable()
+        if (map._map_tool && map._map_tool instanceof maptalks.DrawTool)
+            map._map_tool.disable()
         this._map = map
-        this._tmpLayer = new maptalks.VectorLayer(this._layerTMP).addTo(map).bringToFront()
-        this._chooseLayer = new maptalks.VectorLayer(this._layerName).addTo(map).bringToFront()
+        this._tmpLayer = new maptalks.VectorLayer(this._layerTMP)
+            .addTo(map)
+            .bringToFront()
+        this._chooseLayer = new maptalks.VectorLayer(this._layerName)
+            .addTo(map)
+            .bringToFront()
         this._registerMapEvents()
         return this
     }
@@ -101,13 +110,18 @@ export class GeoSplit extends maptalks.Class {
     }
 
     _mousemoveEvents(e) {
-        let geos = []
         const coordSplit = this._getSafeCoords()
-        this.layer.identify(e.coordinate).forEach((geo) => {
+        const geos = this.layer.identify(e.coordinate)
+        const lines = geos.reduce((target, geo) => {
             const coord = this._getSafeCoords(geo)
-            if (!isEqual(coord, coordSplit) && geo instanceof maptalks.LineString) geos.push(geo)
-        })
-        this._updateHitGeo(geos)
+            if (
+                !isEqual(coord, coordSplit) &&
+                geo instanceof maptalks.LineString
+            )
+                return [...target, geo]
+            return target
+        }, [])
+        this._updateHitGeo(lines)
     }
 
     _getSafeCoords(geo = this.geometry) {
@@ -148,7 +162,8 @@ export class GeoSplit extends maptalks.Class {
         const lineWidth = 4
         if (symbol) {
             for (let key in symbol) {
-                if (key.endsWith('Fill') || key.endsWith('Color')) symbol[key] = color
+                if (key.endsWith('Fill') || key.endsWith('Color'))
+                    symbol[key] = color
             }
             symbol.lineWidth = lineWidth
         } else symbol = { lineColor: color, lineWidth }
@@ -171,11 +186,11 @@ export class GeoSplit extends maptalks.Class {
     }
 
     _setChooseGeosExceptHit(coordHit, hasTmp) {
-        let chooseNext = []
-        this._chooseGeos.forEach((geo) => {
+        const chooseNext = this._chooseGeos.reduce((target, geo) => {
             const coord = this._getSafeCoords(geo)
-            if (!isEqual(coordHit, coord)) chooseNext.push(geo)
-        })
+            if (isEqual(coordHit, coord)) return target
+            return [...target, geo]
+        }, [])
         if (!hasTmp && chooseNext.length === this._chooseGeos.length)
             this._chooseGeos.push(this.hitGeo)
         else this._chooseGeos = chooseNext
@@ -193,8 +208,10 @@ export class GeoSplit extends maptalks.Class {
     _splitWithTargets(targets = this._chooseGeos) {
         if (this.geometry) {
             this._deals = this.options['deleteTargets'] ? targets : []
-            if (this.geometry instanceof maptalks.Polygon) this._splitPolygonWithTargets(targets)
-            if (this.geometry instanceof maptalks.LineString) this._splitLineWithTargets(targets)
+            if (this.geometry instanceof maptalks.Polygon)
+                this._splitPolygonWithTargets(targets)
+            if (this.geometry instanceof maptalks.LineString)
+                this._splitLineWithTargets(targets)
         }
     }
 
@@ -202,26 +219,23 @@ export class GeoSplit extends maptalks.Class {
         let result
         targets = this._getPolygonAvailTargets(targets)
         targets.forEach((target) => {
-            if (result) {
-                let results = []
-                result.forEach((geo) => {
-                    this.geometry = geo
-                    results.push(...this._splitPolygonTargetBase(target))
-                })
-                result = results
-            } else result = this._splitPolygonTargetBase(target)
+            result = result
+                ? result.reduce((last, geo) => {
+                      this.geometry = geo
+                      return [...last, ...this._splitPolygonTargetBase(target)]
+                  }, [])
+                : this._splitPolygonTargetBase(target)
             if (this.options['deleteTargets']) target.remove()
         })
         this._result = result
     }
 
     _getPolygonAvailTargets(targets) {
-        let avails = []
-        targets.forEach((target) => {
-            avails.push(...this._getPolygonAvailTarget(target))
+        return targets.reduce((last, target) => {
+            const result = [...last, ...this._getPolygonAvailTarget(target)]
             if (this.options['deleteTargets']) target.remove()
-        })
-        return avails
+            return result
+        }, [])
     }
 
     _getPolygonAvailTarget(target) {
@@ -232,7 +246,9 @@ export class GeoSplit extends maptalks.Class {
         for (let i = 0; i < coords.length; i++) {
             if (one) {
                 avail = unionWith(avail, [coords[i]], isEqual)
-                const lastStartInner = this.geometry.containsPoint(coords[i - 1])
+                const lastStartInner = this.geometry.containsPoint(
+                    coords[i - 1]
+                )
                 const lastEndOuter = !this.geometry.containsPoint(coords[i])
                 if (lastStartInner && lastEndOuter) {
                     one = false
@@ -243,11 +259,18 @@ export class GeoSplit extends maptalks.Class {
                 }
             } else {
                 if (coords[i + 1]) {
-                    const line = new maptalks.LineString([coords[i], coords[i + 1]])
+                    const line = new maptalks.LineString([
+                        coords[i],
+                        coords[i + 1]
+                    ])
                     const points = this._getPolygonPolylineIntersectPoints(line)
                     if (points.length > 0) {
-                        const startOuter = !this.geometry.containsPoint(coords[i])
-                        const endInner = this.geometry.containsPoint(coords[i + 1])
+                        const startOuter = !this.geometry.containsPoint(
+                            coords[i]
+                        )
+                        const endInner = this.geometry.containsPoint(
+                            coords[i + 1]
+                        )
                         if (startOuter && endInner) {
                             one = true
                             avail = unionWith(avail, [coords[i]], isEqual)
@@ -256,15 +279,16 @@ export class GeoSplit extends maptalks.Class {
                 }
             }
         }
-        let lines = []
-        avails.forEach((line) => lines.push(new maptalks.LineString(line)))
-        return lines
+        return avails.map((line) => new maptalks.LineString(line))
     }
 
     _getPolygonPolylineIntersectPoints(target) {
         const polygon = this._getPoint2dFromCoords(this.geometry)
         const polyline = this._getPoint2dFromCoords(target)
-        const { points } = Intersection.intersectPolygonPolyline(polygon, polyline)
+        const { points } = Intersection.intersectPolygonPolyline(
+            polygon,
+            polyline
+        )
         return points
     }
 
@@ -289,7 +313,10 @@ export class GeoSplit extends maptalks.Class {
         for (let i = 0; i < coords0.length - 1; i++) {
             const line = new maptalks.LineString([coords0[i], coords0[i + 1]])
             const polylineTmp = this._getPoint2dFromCoords(line)
-            const { points } = Intersection.intersectPolylinePolyline(polyline, polylineTmp)
+            const { points } = Intersection.intersectPolylinePolyline(
+                polyline,
+                polylineTmp
+            )
             const [ects] = this._getCoordsFromPoints(points)
             if (isEqual(coords0[i], ects) || points.length > 0) {
                 if (forward) {
@@ -310,10 +337,15 @@ export class GeoSplit extends maptalks.Class {
         let result = []
         const symbol = this.geometry.getSymbol()
         const properties = this.geometry.getProperties()
-        let geo = new maptalks.Polygon(main, { symbol, properties }).addTo(this.layer)
+        let geo = new maptalks.Polygon(main, { symbol, properties }).addTo(
+            this.layer
+        )
         result.push(geo)
         children.forEach((childCoord) => {
-            geo = new maptalks.Polygon(childCoord, { symbol, properties }).addTo(this.layer)
+            geo = new maptalks.Polygon(childCoord, {
+                symbol,
+                properties
+            }).addTo(this.layer)
             result.push(geo)
         })
         return result
@@ -323,18 +355,16 @@ export class GeoSplit extends maptalks.Class {
         const map = this._map
         const zoom = map.getZoom()
         const coords = this._getSafeCoords(geo)
-        let points = []
-        flattenDeep(coords).forEach((coord) => points.push(map.coordinateToPoint(coord, zoom)))
-        return points
+        return flattenDeep(coords).map((coord) =>
+            map.coordinateToPoint(coord, zoom)
+        )
     }
 
     _getCoordsFromPoints(points) {
         if (!(points instanceof Array)) points = [points]
         const map = this._map
         const zoom = map.getZoom()
-        let coords = []
-        points.forEach((point2d) => coords.push(map.pointToCoordinate(point2d, zoom)))
-        return coords
+        return points.map((point2d) => map.pointToCoordinate(point2d, zoom))
     }
 
     _splitWithTargetMoreTwo(target) {
@@ -347,7 +377,10 @@ export class GeoSplit extends maptalks.Class {
         for (let i = 0; i < coords0.length - 1; i++) {
             const line = new maptalks.LineString([coords0[i], coords0[i + 1]])
             const polylineTmp = this._getPoint2dFromCoords(line)
-            const { points } = Intersection.intersectPolylinePolyline(polyline, polylineTmp)
+            const { points } = Intersection.intersectPolylinePolyline(
+                polyline,
+                polylineTmp
+            )
             const ects = this._getCoordsFromPoints(points)
             const [ect] = ects
             if (isEqual(coords0[i], ect) || points.length > 0) {
@@ -374,9 +407,13 @@ export class GeoSplit extends maptalks.Class {
         let result = []
         const symbol = this.geometry.getSymbol()
         const properties = this.geometry.getProperties()
-        let geo = new maptalks.Polygon(main, { symbol, properties }).addTo(this.layer)
+        let geo = new maptalks.Polygon(main, { symbol, properties }).addTo(
+            this.layer
+        )
         result.push(geo)
-        geo = new maptalks.Polygon(child, { symbol, properties }).addTo(this.layer)
+        geo = new maptalks.Polygon(child, { symbol, properties }).addTo(
+            this.layer
+        )
         result.push(geo)
         return result
     }
@@ -399,23 +436,19 @@ export class GeoSplit extends maptalks.Class {
         }
         this._tmpLayer.clear().show()
         if (index[0] !== indexStart) index.reverse()
-        let gap = []
-        index.forEach((i) => gap.push(coords[i]))
-        return gap
+        return index.map((i) => coords[i])
     }
 
     _splitLineWithTargets(targets) {
         targets = this._getLineAvailTargets(targets)
         let result
         targets.forEach((target) => {
-            if (result) {
-                let results = []
-                result.forEach((geo) => {
-                    this.geometry = geo
-                    results.push(...this._splitLineTargetBase(target))
-                })
-                result = results
-            } else result = this._splitLineTargetBase(target)
+            result = result
+                ? result.reduce((last, geo) => {
+                      this.geometry = geo
+                      return [...last, ...this._splitLineTargetBase(target)]
+                  }, [])
+                : this._splitLineTargetBase(target)
             if (this.options['deleteTargets']) target.remove()
         })
         this._result = result
@@ -430,7 +463,10 @@ export class GeoSplit extends maptalks.Class {
             if (coords[i + 1]) {
                 const line = new maptalks.LineString([coords[i], coords[i + 1]])
                 const polylineTmp = this._getPoint2dFromCoords(line)
-                const { points } = Intersection.intersectPolylinePolyline(polyline, polylineTmp)
+                const { points } = Intersection.intersectPolylinePolyline(
+                    polyline,
+                    polylineTmp
+                )
                 if (points.length > 0) {
                     const [ects] = this._getCoordsFromPoints(points)
                     lineCoord.push(ects)
@@ -442,19 +478,19 @@ export class GeoSplit extends maptalks.Class {
                 lines.push(lineCoord)
             }
         }
-        let result = []
-        lines.forEach((line) => result.push(new maptalks.LineString(line).addTo(this.layer)))
+        const result = lines.map((line) =>
+            new maptalks.LineString(line).addTo(this.layer)
+        )
         this.geometry.remove()
         return result
     }
 
     _getLineAvailTargets(targets) {
-        let avails = []
-        targets.forEach((target) => {
-            avails.push(...this._getLineAvailTarget(target))
+        return targets.reduce((last, target) => {
+            const result = [...last, ...this._getLineAvailTarget(target)]
             if (this.options['deleteTargets']) target.remove()
-        })
-        return avails
+            return result
+        }, [])
     }
 
     _getLineAvailTarget(target) {
