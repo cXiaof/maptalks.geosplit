@@ -11,7 +11,7 @@ A tool to split Polygon or Line whith one or more lines.
 -   Install with npm: `npm install maptalks.geosplit`.
 -   Install with yarn: `yarn add maptalks.geosplit`.
 -   Download from [dist directory](https://github.com/cXiaof/maptalks.geosplit/tree/master/dist).
--   Use unpkg CDN: `https://cdn.jsdelivr.net/npm/maptalks.geosplit/dist/maptalks.geosplit.min.js`
+-   Use jsdelivr CDN: `https://cdn.jsdelivr.net/npm/maptalks.geosplit/dist/maptalks.geosplit.min.js`
 
 ## Usage
 

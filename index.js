@@ -182,13 +182,13 @@ export class GeoSplit extends maptalks.Class {
         }
     }
 
-    _setChooseGeosExceptHit(coordHit, hasTmp) {
+    _setChooseGeosExceptHit(coordHit) {
         const chooseNext = this._chooseGeos.reduce((target, geo) => {
             const coord = this._getSafeCoords(geo)
             if (isEqual(coordHit, coord)) return target
             return [...target, geo]
         }, [])
-        if (!hasTmp && chooseNext.length === this._chooseGeos.length)
+        if (chooseNext.length === this._chooseGeos.length)
             this._chooseGeos.push(this.hitGeo)
         else this._chooseGeos = chooseNext
     }
