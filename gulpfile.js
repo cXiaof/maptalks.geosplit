@@ -13,7 +13,9 @@ gulp.task(
     })
 )
 
-gulp.task('watch', () => gulp.watch(['index.js', './gulpfile.js'], gulp.series('build')))
+gulp.task('watch', () =>
+    gulp.watch(['index.js', './gulpfile.js'], gulp.series('build'))
+)
 
 // const { TestHelper } = require('maptalks-build-helpers')
 // const testHelper = new TestHelper()

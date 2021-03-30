@@ -1,7 +1,10 @@
 /*!
  * maptalks.geosplit v0.1.0
  * LICENSE : MIT
- * (c) 2016-2019 maptalks.org
+ * (c) 2016-2021 maptalks.org
+ */
+/*!
+ * requires maptalks@>=0.31.0 
  */
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -7490,7 +7493,7 @@ var GeoSplit = function (_maptalks$Class) {
         }
     };
 
-    GeoSplit.prototype._setChooseGeosExceptHit = function _setChooseGeosExceptHit(coordHit, hasTmp) {
+    GeoSplit.prototype._setChooseGeosExceptHit = function _setChooseGeosExceptHit(coordHit) {
         var _this4 = this;
 
         var chooseNext = this._chooseGeos.reduce(function (target, geo) {
@@ -7498,7 +7501,7 @@ var GeoSplit = function (_maptalks$Class) {
             if (lodash_isequal(coordHit, coord)) return target;
             return [].concat(target, [geo]);
         }, []);
-        if (!hasTmp && chooseNext.length === this._chooseGeos.length) this._chooseGeos.push(this.hitGeo);else this._chooseGeos = chooseNext;
+        if (chooseNext.length === this._chooseGeos.length) this._chooseGeos.push(this.hitGeo);else this._chooseGeos = chooseNext;
     };
 
     GeoSplit.prototype._updateChooseGeos = function _updateChooseGeos() {
@@ -7815,4 +7818,4 @@ GeoSplit.mergeOptions(options);
 
 export { GeoSplit };
 
-typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.0');
+typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.0, requires maptalks@>=0.31.0.');

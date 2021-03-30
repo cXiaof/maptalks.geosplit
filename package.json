@@ -24,6 +24,9 @@
     "watch": "gulp watch",
     "w": "gulp watch"
   },
+  "peerDependencies": {
+    "maptalks": ">=0.31.0"
+  },
   "dependencies": {
     "kld-intersections": "^0.4.3",
     "lodash.flattendeep": "^4.4.0",
@@ -31,10 +34,11 @@
     "lodash.unionwith": "^4.6.0"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.1",
+    "babel-eslint": "^10.1.0",
     "babel-preset-env": "^1.7.0",
-    "gulp": "^4.0.1",
-    "maptalks": "^0.44.0",
-    "maptalks-build-helpers": "^0.4.5"
+    "gulp": "^4.0.2",
+    "maptalks": "^0.49.1",
+    "maptalks-build-helpers": "^0.4.5",
+    "prettier": "^2.2.1"
   }
 }
