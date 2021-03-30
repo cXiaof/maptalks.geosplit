@@ -1,5 +1,5 @@
 /*!
- * maptalks.geosplit v0.1.0
+ * maptalks.geosplit v0.1.1
  * LICENSE : MIT
  * (c) 2016-2021 maptalks.org
  */
@@ -7306,8 +7306,11 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : _defaults(subClass, superClass); }
 
+var uid = 'geosplit@cXiaof';
 var options = {
-    deleteTargets: true
+    deleteTargets: true,
+    colorHit: '#ffa400',
+    colorChosen: '#00bcd4'
 };
 
 var GeoSplit = function (_maptalks$Class) {
@@ -7318,11 +7321,9 @@ var GeoSplit = function (_maptalks$Class) {
 
         var _this = _possibleConstructorReturn(this, _maptalks$Class.call(this, options));
 
-        _this._layerName = maptalks.INTERNAL_LAYER_PREFIX + '_CDSP';
-        _this._layerTMP = maptalks.INTERNAL_LAYER_PREFIX + '_CDSP_TMP';
+        _this._layerName = '' + maptalks.INTERNAL_LAYER_PREFIX + uid;
+        _this._layerTMP = '' + maptalks.INTERNAL_LAYER_PREFIX + uid + '_temp';
         _this._chooseGeos = [];
-        _this._colorHit = '#ffa400';
-        _this._colorChoose = '#00bcd4';
         return _this;
     }
 
@@ -7470,7 +7471,7 @@ var GeoSplit = function (_maptalks$Class) {
 
     GeoSplit.prototype._getSymbolOrDefault = function _getSymbolOrDefault(geo, type) {
         var symbol = geo.getSymbol();
-        var color = this['_color' + type];
+        var color = this.options['color' + type];
         var lineWidth = 4;
         if (symbol) {
             for (var key in symbol) {
@@ -7510,7 +7511,7 @@ var GeoSplit = function (_maptalks$Class) {
         var layer = this._chooseLayer;
         layer.clear();
         this._chooseGeos.forEach(function (geo) {
-            var chooseSymbol = _this5._getSymbolOrDefault(geo, 'Choose');
+            var chooseSymbol = _this5._getSymbolOrDefault(geo, 'Chosen');
             _this5._copyGeoUpdateSymbol(geo, chooseSymbol);
         });
     };
@@ -7818,4 +7819,4 @@ GeoSplit.mergeOptions(options);
 
 export { GeoSplit };
 
-typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.0, requires maptalks@>=0.31.0.');
+typeof console !== 'undefined' && console.log('maptalks.geosplit v0.1.1, requires maptalks@>=0.31.0.');

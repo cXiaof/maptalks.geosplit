@@ -3,18 +3,19 @@ import isEqual from 'lodash.isequal'
 import unionWith from 'lodash.unionwith'
 import flattenDeep from 'lodash.flattendeep'
 
+const uid = 'geosplit@cXiaof'
 const options = {
-    deleteTargets: true
+    deleteTargets: true,
+    colorHit: '#ffa400',
+    colorChosen: '#00bcd4',
 }
 
 export class GeoSplit extends maptalks.Class {
     constructor(options) {
         super(options)
-        this._layerName = `${maptalks.INTERNAL_LAYER_PREFIX}_CDSP`
-        this._layerTMP = `${maptalks.INTERNAL_LAYER_PREFIX}_CDSP_TMP`
+        this._layerName = `${maptalks.INTERNAL_LAYER_PREFIX}${uid}`
+        this._layerTMP = `${maptalks.INTERNAL_LAYER_PREFIX}${uid}_temp`
         this._chooseGeos = []
-        this._colorHit = '#ffa400'
-        this._colorChoose = '#00bcd4'
     }
 
     split(geometry, targets) {
@@ -155,7 +156,7 @@ export class GeoSplit extends maptalks.Class {
 
     _getSymbolOrDefault(geo, type) {
         let symbol = geo.getSymbol()
-        const color = this[`_color${type}`]
+        const color = this.options[`color${type}`]
         const lineWidth = 4
         if (symbol) {
             for (let key in symbol) {
@@ -168,10 +169,7 @@ export class GeoSplit extends maptalks.Class {
     }
 
     _copyGeoUpdateSymbol(geo, symbol) {
-        return geo
-            .copy()
-            .updateSymbol(symbol)
-            .addTo(this._chooseLayer)
+        return geo.copy().updateSymbol(symbol).addTo(this._chooseLayer)
     }
 
     _clickEvents(e) {
@@ -197,7 +195,7 @@ export class GeoSplit extends maptalks.Class {
         const layer = this._chooseLayer
         layer.clear()
         this._chooseGeos.forEach((geo) => {
-            const chooseSymbol = this._getSymbolOrDefault(geo, 'Choose')
+            const chooseSymbol = this._getSymbolOrDefault(geo, 'Chosen')
             this._copyGeoUpdateSymbol(geo, chooseSymbol)
         })
     }
@@ -258,7 +256,7 @@ export class GeoSplit extends maptalks.Class {
                 if (coords[i + 1]) {
                     const line = new maptalks.LineString([
                         coords[i],
-                        coords[i + 1]
+                        coords[i + 1],
                     ])
                     const points = this._getPolygonPolylineIntersectPoints(line)
                     if (points.length > 0) {
@@ -341,7 +339,7 @@ export class GeoSplit extends maptalks.Class {
         children.forEach((childCoord) => {
             geo = new maptalks.Polygon(childCoord, {
                 symbol,
-                properties
+                properties,
             }).addTo(this.layer)
             result.push(geo)
         })
