@@ -31,22 +31,21 @@ export class GeoSplit extends maptalks.Class {
                 this.remove()
                 return result
             }
-            return this
         }
+        return this
     }
 
     submit(callback = () => false) {
         this._splitWithTargets()
         callback(this._result, this._deals)
-        this.remove()
+        return this.remove()
     }
 
     cancel() {
-        this.remove()
+        return this.remove()
     }
 
     remove() {
-        const map = this._map
         if (this._tmpLayer) this._tmpLayer.remove()
         if (this._chooseLayer) this._chooseLayer.remove()
         this._chooseGeos = []
@@ -58,6 +57,7 @@ export class GeoSplit extends maptalks.Class {
         delete this._mousemove
         delete this._click
         delete this._dblclick
+        return this
     }
 
     _initialTaskWithGeo(geometry) {
@@ -71,10 +71,8 @@ export class GeoSplit extends maptalks.Class {
 
     _savePrivateGeometry(geometry) {
         this.geometry = geometry
-        this.layer = geometry._layer
-        if (geometry.getType().startsWith('Multi'))
-            this.layer = geometry._geometries[0]._layer
-        this._addTo(this.layer.map)
+        this.layer = geometry.getLayer()
+        this._addTo(geometry.getMap())
     }
 
     _addTo(map) {
@@ -93,21 +91,13 @@ export class GeoSplit extends maptalks.Class {
     }
 
     _registerMapEvents() {
-        if (!this._mousemove) {
-            const map = this._map
-            this._mousemove = (e) => this._mousemoveEvents(e)
-            this._click = (e) => this._clickEvents(e)
-            map.on('mousemove', this._mousemove, this)
-            map.on('click', this._click, this)
-        }
+        this._map.on('mousemove', this._mousemoveEvents, this)
+        this._map.on('click', this._clickEvents, this)
     }
 
     _offMapEvents() {
-        if (this._mousemove) {
-            const map = this._map
-            map.off('mousemove', this._mousemove, this)
-            map.off('click', this._click, this)
-        }
+        this._map.off('mousemove', this._mousemoveEvents, this)
+        this._map.off('click', this._clickEvents, this)
     }
 
     _mousemoveEvents(e) {
@@ -172,7 +162,7 @@ export class GeoSplit extends maptalks.Class {
         return geo.copy().updateSymbol(symbol).addTo(this._chooseLayer)
     }
 
-    _clickEvents(e) {
+    _clickEvents() {
         if (this.hitGeo) {
             const coordHit = this._getSafeCoords(this.hitGeo)
             this._setChooseGeosExceptHit(coordHit)
