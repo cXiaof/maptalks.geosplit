@@ -36,6 +36,8 @@ new maptalks.GeoSplit()
 
 -   options
     -   deleteTargets **boolean** decide if targets lines will be removed, default is true
+    -   colorHit **String** the color of symbol when geo hit
+    -   colorChosen **String** the color of symbol when geo chosen
 
 `split(geometry, targets)` **targets can be one line or lines-array**
 `submit(callback)` callback can get two attr, the result and deals which be remove in task

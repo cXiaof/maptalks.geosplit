@@ -31,18 +31,18 @@ export class GeoSplit extends maptalks.Class {
                 this.remove()
                 return result
             }
+            return this
         }
-        return this
     }
 
     submit(callback = () => false) {
         this._splitWithTargets()
         callback(this._result, this._deals)
-        return this.remove()
+        this.remove()
     }
 
     cancel() {
-        return this.remove()
+        this.remove()
     }
 
     remove() {
@@ -57,7 +57,6 @@ export class GeoSplit extends maptalks.Class {
         delete this._mousemove
         delete this._click
         delete this._dblclick
-        return this
     }
 
     _initialTaskWithGeo(geometry) {
